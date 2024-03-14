@@ -1,0 +1,23 @@
+{
+  "name": "domecloud_standard_contracts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "chai": "^4.3.7",
+    "ethers": "^5.7.2",
+    "hardhat-deploy": "^0.11.22",
+    "hardhat-deploy-ethers": "^0.3.0-beta.13",
+    "node-fetch": "^2.6.8"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1"
+  }
+}
