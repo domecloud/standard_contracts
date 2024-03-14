@@ -26,19 +26,19 @@ module.exports = {
     jbc: {
       url: 'https://rpc-l1.jibchain.net/',
       chainId: 8899,
-      gasPrice: ethers.parseUnits('1.5', 'gwei'),
+      gasPrice: 1.5*1e9,
       accounts: deployer
     },
     bsc: {
       url: 'https://bsc-dataseed.binance.org/',
       chainId: 56,
-      gasPrice: ethers.parseUnits('5', 'gwei'),
+      gasPrice: 5*1e9,
       accounts: deployer
     },
     mumbai: {
       url: 'https://rpc.ankr.com/polygon_mumbai',
       chainId: 80001,
-      gasPrice: ethers.parseUnits('2', 'gwei'),
+      gasPrice: 2*1e9,
       accounts: deployer
     }
   },
