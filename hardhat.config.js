@@ -1,14 +1,14 @@
 require('hardhat-deploy');
 require('hardhat-deploy-ethers');
-require("@nomicfoundation/hardhat-toolbox");
+require('@nomicfoundation/hardhat-toolbox');
 
-const deployer = ["0x1480b838712a59c68ff4f5e1b447939b0071116a8e924730d6c93339ff0fd7a7"]; // test wallet, dont forget to prepare gas
+const deployer = ['0x1480b838712a59c68ff4f5e1b447939b0071116a8e924730d6c93339ff0fd7a7']; // test wallet, dont forget to prepare gas
 
 module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.8.20",
+        version: '0.8.20',
         settings: {
           optimizer: {
             enabled: true // optional, occasionally make tx gas cheaper.
@@ -23,24 +23,22 @@ module.exports = {
   networks: {
 
     // mainnet
-    bsc: {
-      url: "https://bsc-dataseed.binance.org/",
-      chainId: 56,
-      gasPrice: 5*1e9,
+    jbc: {
+      url: 'https://rpc-l1.jibchain.net/',
+      chainId: 8899,
+      gasPrice: ethers.parseUnits('1.5', 'gwei'),
       accounts: deployer
     },
-
-    // Testnet
-    ITMX_testnet1:{
-      url: "https://descf-rpc.tokenine.co/",
-      chainId: 19999,
-      gasPrice: 10*1e9,
+    bsc: {
+      url: 'https://bsc-dataseed.binance.org/',
+      chainId: 56,
+      gasPrice: ethers.parseUnits('5', 'gwei'),
       accounts: deployer
     },
     mumbai: {
-      url: "https://rpc.ankr.com/polygon_mumbai",
+      url: 'https://rpc.ankr.com/polygon_mumbai',
       chainId: 80001,
-      gasPrice: 2*1e9,
+      gasPrice: ethers.parseUnits('2', 'gwei'),
       accounts: deployer
     }
   },
@@ -51,11 +49,11 @@ module.exports = {
     },
     customChains: [
       {
-        network: "ITMX_testnet1",
-        chainId: 19999,
+        network: 'jbc',
+        chainId: 8899,
         urls: {
-          apiURL: "https://descf-exp.tokenine.co/api",
-          browserURL: "https://descf-exp.tokenine.co/"
+          apiURL: 'https://rpc-l1.jibchain.net/api',
+          browserURL: 'https://exp.jbcha.in/'
         }
       }
     ]

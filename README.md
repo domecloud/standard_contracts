@@ -19,20 +19,20 @@ npx hardhat test ./test/NFT.js
 
 ## ติดตั้ง contract ขึ้นเชน
 
-เช่น deploy ERC-20 ไปยัง ITMX Testnet 1 Chain
+เช่น deploy ERC-20 ไปยัง JIB Chain
 ```
-npx hardhat deploy --network ITMX_testnet1 --tags Token
+npx hardhat deploy --network jbc --tags Token
 ```
-เช่น deploy ERC-721 ไปยัง ITMX Testnet 1  Chain
+เช่น deploy ERC-721 ไปยัง JIB Chain
 ```
-npx hardhat deploy --network ITMX_testnet1 --tags NFT
+npx hardhat deploy --network jbc --tags NFT
 ```
 
 เพิ่มลดเชนได้ที่ hardhat.config.js
 
 ## verify contracts
 ```
-npx hardhat verify --network ITMX_testnet1 <contract_address>
+npx hardhat verify --network jbc <contract_address>
 ```
 
 
