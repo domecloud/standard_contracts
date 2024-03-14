@@ -45,7 +45,7 @@ module.exports = {
   etherscan: {
     apiKey: {
       polygonMumbai: 'FCCYV92JQ9SGKJ6I61EQS6YCMPE4Y316QA',
-      ITMX_testnet1: 'any'
+      jbc 'any'
     },
     customChains: [
       {
