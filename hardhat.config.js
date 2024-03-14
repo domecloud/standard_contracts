@@ -52,8 +52,8 @@ module.exports = {
         network: 'jbc',
         chainId: 8899,
         urls: {
-          apiURL: 'https://rpc-l1.jibchain.net/api',
-          browserURL: 'https://exp.jbcha.in/'
+          apiURL: "https://exp-l1.jibchain.net/api",
+          browserURL: "https://exp-l1.jibchain.net/"
         }
       }
     ]
