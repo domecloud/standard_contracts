@@ -6,12 +6,11 @@ import "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
 
 import "./ACL.sol";
+import "./Freezable.sol";
 
-contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
+contract NFT is ERC721URIStorage, ERC721Enumerable, ACL, Freezable {
 
     event Memo(string memo);
-    event Freeze(address account);
-    event Unfreeze(address account);
     event SetPubliclyMintable(bool mintable);
     event SBTStatusSet(bool SBT);
     event Mint(address indexed to, uint256 tokenId, string uri);
@@ -20,7 +19,6 @@ contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
 
     bool public isPubliclyMintable = false;
     bool public isSBT = false;
-    mapping(address => bool) public freezeAccounts;
 
     uint256 private _tokenIds;
 
@@ -42,28 +40,14 @@ contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
         emit SBTStatusSet(SBT);
     }
 
-    function freeze(address account) public onlyAdmin {
-        freezeAccounts[account] = true;
-        emit Freeze(account);
-    }
-
-    function unfreeze(address account) public onlyAdmin {
-        freezeAccounts[account] = false;
-        emit Unfreeze(account);
-    }
-
-    function safeMint(address to, string memory uri) public returns (uint256) {
-        bool isMinter = hasRole(MINTER_ROLE, msg.sender);
-        require(isPubliclyMintable || isMinter, "This NFT is not publicly mintable");
-        
-        uint256 tokenId = _tokenIds;
+    function safeMint(address to, string memory uri) public returns (uint256 tokenId) {
+        require(isPubliclyMintable || hasRole(MINTER_ROLE, msg.sender), "This NFT is not publicly mintable");
+        tokenId = _tokenIds;
         _tokenIds += 1;
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
 
         emit Mint(to, tokenId, uri);
-
-        return tokenId;
     }
 
     function setTokenURI(uint256 tokenId, string memory uri) public onlyAdmin {
@@ -73,10 +57,12 @@ contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
 
     function burn(uint256 tokenId) public {
         require(!isSBT, "This NFT was not permitted to burn");
-        require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
-        require(hasRole(BURNER_ROLE, msg.sender) || msg.sender == ownerOf(tokenId), "Caller does not own this NFT");
+        if (msg.sender == ownerOf(tokenId) && freezeAccounts[msg.sender]) {
+            revert AccountHasBeenFrozen(msg.sender);
+        } else if (msg.sender != ownerOf(tokenId)) {
+            require(hasRole(BURNER_ROLE, msg.sender), "Caller does not own this NFT");
+        }
         _burn(tokenId);
-
         emit Burn(tokenId);
     }
 
@@ -94,12 +80,11 @@ contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721, IERC721) {
+    ) public override(ERC721, IERC721) 
+        notFrozen(msg.sender)
+    {
         require(!isSBT, "This NFT was not permitted to transfer");
-        require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
-
         super.transferFrom(from, to, tokenId);
-
     }
 
     function safeTransferFrom(
@@ -107,12 +92,11 @@ contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override(ERC721, IERC721) {
+    ) public override(ERC721, IERC721) 
+        notFrozen(msg.sender)
+    {
         require(!isSBT, "This NFT was not permitted to transfer");
-        require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
-        
         super.safeTransferFrom(from, to, tokenId, data);
-
     }
 
     // The following functions are overrides required by Solidity.
@@ -141,11 +125,10 @@ contract NFT is ERC721URIStorage, ERC721Enumerable, ACL {
     ) 
         internal 
         override(ERC721, ERC721Enumerable) 
-        returns (address) 
+        returns (address from) 
     {
-        address from = super._update(to, tokenId, auth);
+        from = super._update(to, tokenId, auth);
         require(freezeAccounts[from] != true, "Owner has been frozen");
-        return from;
     }
 
     function _increaseBalance(
