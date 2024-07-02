@@ -74,7 +74,6 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit {
     }
 
     function burnFrom(address from, uint256 amount) public override(ERC20Burnable){
-        require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
         require(hasRole(BURNER_ROLE, msg.sender) || from == msg.sender, "Caller does not has a BURNER_ROLE");
         _burn(from, amount);
         totalBurnAmount += amount;
