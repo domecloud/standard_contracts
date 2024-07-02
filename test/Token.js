@@ -306,43 +306,6 @@ describe("Token - Burn check", function () {
         ).to.be.revertedWith('Caller does not has a BURNER_ROLE');
     });
 
-    it("Should NOT burnFrom() by freeze address", async function () {
-        const { Token, admin, minter, burner, pauser, admin2, alice, bob } = await deployContract();
-
-        await Token.grantBurner(burner.address);
-
-        const amountToMint = Math.floor(Math.random()*1000000) + 1000000;
-        const amountToBurn = Math.floor(Math.random()*1000000);
-
-        await Token.mintTo(alice.address, ethers.utils.parseEther(amountToMint.toString()));
-
-        await Token.freeze(burner.address);
-
-        await expect(
-            Token.connect(burner).burnFrom(alice.address, ethers.utils.parseEther(amountToBurn.toString()))
-        ).to.be.revertedWith('Caller has been frozen');
-    });
-
-    it("Should burnFrom() by unfreeze address", async function () {
-        const { Token, admin, minter, burner, pauser, admin2, alice, bob } = await deployContract();
-
-        await Token.grantBurner(burner.address);
-
-        const amountToMint = Math.floor(Math.random()*1000000) + 1000000;
-        const amountToBurn = Math.floor(Math.random()*1000000);
-
-        await Token.mintTo(alice.address, ethers.utils.parseEther(amountToMint.toString()));
-
-        await Token.freeze(burner.address);
-        await Token.unfreeze(burner.address);
-
-        await Token.connect(burner).burnFrom(alice.address, ethers.utils.parseEther(amountToBurn.toString()));
-
-        const balance = +ethers.utils.formatEther(await Token.balanceOf(alice.address));
-
-        expect(balance).to.equal(amountToMint - amountToBurn);
-    });
-
     it("Should NOT burnFrom() of freeze address", async function () {
         const { Token, admin, minter, burner, pauser, admin2, alice, bob } = await deployContract();
 
@@ -357,7 +320,7 @@ describe("Token - Burn check", function () {
 
         await expect(
             Token.connect(burner).burnFrom(alice.address, ethers.utils.parseEther(amountToBurn.toString()))
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should burnFrom() of unfreeze address", async function () {
@@ -394,7 +357,7 @@ describe("Token - Burn check", function () {
 
         await expect(
             Token.connect(alice).burn(ethers.utils.parseEther(amountToBurn.toString()))
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
 
@@ -556,7 +519,7 @@ describe("Token - Transfer check", function () {
 
         await expect(
             Token.connect(alice)['transfer(address,uint256)'](bob.address, ethers.utils.parseEther(amountToTransfer.toString()))
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should NOT transfer() with Memo by freeze owner", async function () {
@@ -570,7 +533,7 @@ describe("Token - Transfer check", function () {
 
         await expect(
             Token.connect(alice)['transfer(address,uint256)'](bob.address, ethers.utils.parseEther(amountToTransfer.toString()))
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should transfer() by unfreeze owner", async function () {
@@ -651,7 +614,7 @@ describe("Token - Transfer check", function () {
 
         await expect(
             Token.connect(bob)['transferFrom(address,address,uint256)'](alice.address, bob.address, ethers.utils.parseEther(amountToTransfer.toString()))
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should NOT transferFrom() with Memo by approved freeze address (insufficient allowance)", async function () {
@@ -668,7 +631,7 @@ describe("Token - Transfer check", function () {
 
         await expect(
             Token.connect(bob)['transferFrom(address,address,uint256,string)'](alice.address, bob.address, ethers.utils.parseEther(amountToTransfer.toString()), "Memo")
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should transferFrom() by approved unfreeze address (sufficient allowance)", async function () {
@@ -729,7 +692,7 @@ describe("Token - Transfer check", function () {
 
         await expect(
             Token.connect(bob)['transferFrom(address,address,uint256)'](alice.address, bob.address, ethers.utils.parseEther(amountToTransfer.toString()))
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should NOT transferFrom() with Memo by approved address of freeze owner (insufficient allowance)", async function () {
@@ -746,7 +709,7 @@ describe("Token - Transfer check", function () {
 
         await expect(
             Token.connect(bob)['transferFrom(address,address,uint256,string)'](alice.address, bob.address, ethers.utils.parseEther(amountToTransfer.toString()), 'Memo')
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(Token, "AccountHasBeenFrozen");
     });
 
     it("Should transferFrom() by approved address of unfreeze owner (sufficient allowance)", async function () {

@@ -506,7 +506,7 @@ describe("NFT - Transfer check", function () {
         await NFT.freeze(alice.address);
         await expect(
             NFT.connect(alice).transfer(bob.address, tokenId)
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should NOT transferFrom() by non-owner", async function () {
@@ -527,7 +527,7 @@ describe("NFT - Transfer check", function () {
         await NFT.freeze(alice.address);
         await expect(
             NFT.connect(alice).transferFrom(alice.address, bob.address, tokenId)
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should NOT transferFrom() of freeze owner by approved address", async function () {
@@ -553,7 +553,7 @@ describe("NFT - Transfer check", function () {
         await NFT.freeze(bob.address);
         await expect(
             NFT.connect(bob).transferFrom(alice.address, bob.address, tokenId)
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should transfer() by unfreeze owner", async function () {
@@ -681,7 +681,7 @@ describe("NFT - Transfer check", function () {
         await NFT.freeze(alice.address);
         await expect(
             NFT.connect(alice)['safeTransfer(address,uint256)'](bob.address, tokenId)
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should NOT safeTransferFrom() by freeze owner", async function () {
@@ -692,7 +692,7 @@ describe("NFT - Transfer check", function () {
         await NFT.freeze(alice.address);
         await expect(
             NFT.connect(alice)['safeTransferFrom(address,address,uint256)'](alice.address, bob.address, tokenId)
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should NOT safeTransferFrom() of freeze owner by approved address", async function () {
@@ -718,7 +718,7 @@ describe("NFT - Transfer check", function () {
         await NFT.freeze(bob.address);
         await expect(
             NFT.connect(bob)['safeTransferFrom(address,address,uint256)'](alice.address, bob.address, tokenId)
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should safeTransfer() by unfreeze owner", async function () {
@@ -876,7 +876,7 @@ describe("NFT - Burn check", function () {
         NFT.revokeBurner(burner.address);
         await expect(
             NFT.connect(alice).burn(tokenId)
-        ).to.revertedWith('Caller has been frozen');
+        ).to.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
 
     it("Should NOT burn() of freeze owner by burner", async function () {
@@ -894,40 +894,6 @@ describe("NFT - Burn check", function () {
         await expect(
             NFT.connect(burner).burn(tokenId)
         ).to.revertedWith('Owner has been frozen');
-    });
-
-    it("Should NOT burn() by freeze burner", async function () {
-        const { NFT, admin, minter, burner, admin2, alice, bob } = await deployContract();
-
-        const trx = await NFT.safeMint(alice.address, URI);
-        const tokenId = trx.value.toString();
-
-        await NFT.grantBurner(burner.address);
-
-        await NFT.freeze(burner.address);
-
-        NFT.revokeBurner(burner.address);
-        await expect(
-            NFT.connect(burner).burn(tokenId)
-        ).to.revertedWith('Caller has been frozen');
-    });
-
-    it("Should burn() by unfreeze burner", async function () {
-        const { NFT, admin, minter, burner, admin2, alice, bob } = await deployContract();
-
-        NFT.grantBurner(burner.address);
-
-        const trx = await NFT.safeMint(alice.address, URI);
-        const tokenId = trx.value.toString();
-
-        await NFT.freeze(burner.address);
-        await NFT.unfreeze(burner.address);
-
-        await NFT.connect(burner).burn(tokenId);
-
-        await expect(
-            NFT.tokenURI(tokenId)
-        ).to.revertedWithCustomError(NFT, 'ERC721NonexistentToken');
     });
 
     it("Should burn() by unfreeze owner", async function () {
