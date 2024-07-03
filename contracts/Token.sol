@@ -10,6 +10,8 @@ import "./ACL.sol";
 
 contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit {
 
+    bool public max_supply_enabled = false;
+    uint256 public max_supply_amount;
     uint256 public totalMintAmount = 0;
     uint256 public totalBurnAmount = 0;
     uint256 public totalTransferedAmount = 0;
@@ -56,12 +58,18 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit {
     }
 
     function mint(uint256 amount) public onlyMinter {
+        if (max_supply_enabled) {
+            require(totalSupply() + amount <= max_supply_amount, "Exceeds max supply");
+        }
         _mint(msg.sender, amount);
         totalMintAmount += amount;
         emit Mint(msg.sender, amount);
     }
 
     function mintTo(address to, uint256 amount) public onlyMinter {
+        if (max_supply_enabled) {
+            require(totalSupply() + amount <= max_supply_amount, "Exceeds max supply");
+        }
         _mint(to, amount);
         totalMintAmount += amount;
         emit Mint(to, amount);
@@ -94,18 +102,6 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit {
         require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
 
         if (transfer(to, amount)) {
-            totalTransferedAmount += amount;
-            if (bytes(memo).length > 0) {
-                emit Memo(memo);
-            }
-        }
-    }
-
-    function transferFrom(address from, address to, uint256 amount, string memory memo) public {
-        require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
-
-        if (transferFrom(from, to, amount)) {
-            totalTransferedAmount += amount;
             if (bytes(memo).length > 0) {
                 emit Memo(memo);
             }
@@ -116,6 +112,16 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit {
         require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
         totalTransferedAmount += amount;
         return super.transferFrom(from, to, amount);
+    }
+
+    function transferFrom(address from, address to, uint256 amount, string memory memo) public {
+        require(freezeAccounts[msg.sender] != true, "Caller has been frozen");
+
+        if (transferFrom(from, to, amount)) {
+            if (bytes(memo).length > 0) {
+                emit Memo(memo);
+            }
+        }
     }
 
     // The following functions are overrides required by Solidity.
