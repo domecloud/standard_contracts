@@ -81,30 +81,28 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit, Freezable {
         notFrozen(msg.sender) 
     {
         if (transfer(to, amount)) {
-            totalTransferedAmount += amount;
             if (bytes(memo).length > 0) {
                 emit Memo(memo);
             }
         }
     }
-
-    function transferFrom(address from, address to, uint256 amount, string memory memo) public 
-        notFrozen(msg.sender) 
-    {
-        if (transferFrom(from, to, amount)) {
-            totalTransferedAmount += amount;
-            if (bytes(memo).length > 0) {
-                emit Memo(memo);
-            }
-        }
-    }
-
+    
     function transferFrom(address from, address to, uint256 amount) public virtual override
         notFrozen(msg.sender)  
         returns (bool) 
     {
         totalTransferedAmount += amount;
         return super.transferFrom(from, to, amount);
+    }
+
+    function transferFrom(address from, address to, uint256 amount, string memory memo) public 
+        notFrozen(msg.sender) 
+    {
+        if (transferFrom(from, to, amount)) {
+            if (bytes(memo).length > 0) {
+                emit Memo(memo);
+            }
+        }
     }
 
     // The following functions are overrides required by Solidity.
