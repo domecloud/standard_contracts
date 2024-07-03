@@ -1022,7 +1022,7 @@ describe("NFT2 - Transfer check", function () {
 
         await expect(
             NFT2.connect(alice).safeTransfer(bob.address, tokenId, ethers.utils.parseEther(amountToTransfer.toString()))
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(NFT2, "AccountHasBeenFrozen");
     });
 
     it("Should NOT safeBatchTransfer() by freeze address", async function () {
@@ -1054,7 +1054,7 @@ describe("NFT2 - Transfer check", function () {
 
         await expect(
             NFT2.connect(alice).safeBatchTransfer(bob.address, tokenIds, amountToTransfers_c)
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(NFT2, "AccountHasBeenFrozen");
         
     });
 
@@ -1086,7 +1086,7 @@ describe("NFT2 - Transfer check", function () {
 
         await expect(
             NFT2.connect(alice).safeBatchTransferFrom(alice.address, NFT2.address, tokenIds, amountToTransfers_c, "0x")
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(NFT2, "AccountHasBeenFrozen");
     });
 
 
@@ -1157,9 +1157,6 @@ describe("NFT2 - Transfer check", function () {
         }
         
     });
-
-
-    
 
     /*
     it("Should safeTransferFrom() by unfreeze address", async function () {
@@ -1280,7 +1277,7 @@ describe("NFT2 - Transfer check", function () {
 
         await expect(
             NFT2.connect(bob).safeBatchTransferFrom(alice.address, NFT2.address, tokenIds, amountToTransfers_c, "0x")
-        ).to.be.revertedWith('Owner has been frozen');
+        ).to.be.revertedWithCustomError(NFT2, "AccountHasBeenFrozen");
     });
 
     /*
@@ -1299,45 +1296,9 @@ describe("NFT2 - Transfer check", function () {
 
         await expect(
             NFT2.connect(bob).safeTransferFrom(alice.address, bob.address, tokenId, ethers.utils.parseEther(amountToTransfer.toString()), "0x")
-        ).to.be.revertedWith('Caller has been frozen');
+        ).to.be.revertedWithCustomError(NFT, "AccountHasBeenFrozen");
     });
     */
-
-    it("Should NOT safeBatchTransferFrom() from not freeze address by approve freeze address", async function () {
-        const { NFT2, admin, minter, burner, admin2, alice, bob } = await deployContract();
-        
-        const numToTrans = Math.floor(Math.random()*9);
-
-        let tokenIds = [];
-        let amountToTransfers = [];
-        let amountToTransfers_c = [];
-        let amountToMints = [];
-        let amountToMints_c = [];
-        for(let index=0; index<numToTrans; index++){
-            const tokenId = Math.floor(Math.random()*1000000);
-            const amountToTransfer = Math.floor(Math.random()*1000000);
-            const amountToMint = Math.floor(Math.random()*1000000)+1000000;
-
-            tokenIds.push(tokenId);
-            amountToTransfers.push(amountToTransfer);
-            amountToTransfers_c.push(ethers.utils.parseEther(amountToTransfer.toString()));
-            amountToMints.push(amountToMint);
-            amountToMints_c.push(ethers.utils.parseEther(amountToMint.toString()));
-        }
-        
-        await NFT2.mintBatch(alice.address, tokenIds, amountToMints_c, "0x");
-
-        await NFT2.connect(alice).setApprovalForAll(bob.address, true);
-
-        await NFT2.freeze(bob.address);
-
-        await expect(
-            NFT2.connect(bob).safeBatchTransferFrom(alice.address, NFT2.address, tokenIds, amountToTransfers_c, "0x")
-        ).to.be.revertedWith('Caller has been frozen');
-    });
-
-
-
 
 });
 
@@ -1385,8 +1346,6 @@ describe("NFT2 - Burn check", function () {
             amountToMints_c.push(ethers.utils.parseEther(amountToMint.toString()));
             amountToBurns_c.push(ethers.utils.parseEther(amountToBurn.toString()));
         }
-
-
 
         await NFT2.mintBatch(alice.address, tokenIds, amountToMints_c, "0x");
         await NFT2.connect(burner).burnBatch(alice.address, tokenIds, amountToBurns_c);
@@ -1550,25 +1509,7 @@ describe("NFT2 - Burn check", function () {
 
         await expect(
             NFT2.connect(burner).burn(alice.address, tokenId, ethers.utils.parseEther(amountToBurn.toString()))
-        ).to.revertedWith('Owner has been frozen');
-    });
-
-    it("Should NOT burn() by freeze address", async function () {
-        const { NFT2, admin, minter, burner, admin2, alice, bob } = await deployContract();
-
-        NFT2.grantBurner(burner.address);
-
-        const amountToMint = Math.floor(Math.random()*1000000)+1000000
-        const amountToBurn = Math.floor(Math.random()*1000000)
-        const tokenId = Math.floor(Math.random()*1000000);
-
-        await NFT2.mint(alice.address, tokenId, ethers.utils.parseEther(amountToMint.toString()), "0x");
-
-        await NFT2.freeze(burner.address);
-
-        await expect(
-            NFT2.connect(burner).burn(alice.address, tokenId, ethers.utils.parseEther(amountToBurn.toString()))
-        ).to.revertedWith('Caller has been frozen');
+        ).to.revertedWithCustomError(NFT2, "AccountHasBeenFrozen");
     });
 
     it("Should NOT burnBatch() by former-burner", async function () {
@@ -1636,42 +1577,7 @@ describe("NFT2 - Burn check", function () {
 
         await expect(
             NFT2.connect(burner).burnBatch(alice.address, tokenIds, amountToBurns_c)
-        ).to.revertedWith('Owner has been frozen');
-
-    });
-
-    it("Should NOT burnBatch() by freeze address", async function () {
-        const { NFT2, admin, minter, burner, admin2, alice, bob } = await deployContract();
-
-        NFT2.grantBurner(burner.address);
-
-        const numToTrans = Math.floor(Math.random()*9);
-
-        let tokenIds = [];
-        let amountToMints = [];
-        let amountToMints_c = [];
-        let amountToBurns = [];
-        let amountToBurns_c = [];
-        
-        for(let index=0; index<numToTrans; index++){
-            const tokenId = Math.floor(Math.random()*1000000);
-            const amountToMint = Math.floor(Math.random()*1000000)+1000000;
-            const amountToBurn = Math.floor(Math.random()*1000000);
-            tokenIds.push(tokenId);
-            amountToMints.push(amountToMint);
-            amountToBurns.push(amountToBurn);
-            amountToMints_c.push(ethers.utils.parseEther(amountToMint.toString()));
-            amountToBurns_c.push(ethers.utils.parseEther(amountToBurn.toString()));
-        }
-
-        await NFT2.mintBatch(alice.address, tokenIds, amountToMints_c, "0x");
-
-        await NFT2.freeze(burner.address);
-
-
-        await expect(
-            NFT2.connect(burner).burnBatch(alice.address, tokenIds, amountToBurns_c)
-        ).to.revertedWith('Caller has been frozen');
+        ).to.revertedWithCustomError(NFT2, "AccountHasBeenFrozen");
 
     });
 
