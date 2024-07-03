@@ -66,7 +66,7 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit, Freezable {
         emit Burn(from, amount);
     }
 
-    function transfer(address to, uint256 amount) public override
+    function transfer(address to, uint256 amount) public virtual override
         notFrozen(msg.sender)          
         returns (bool) 
     {
@@ -99,7 +99,7 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit, Freezable {
         }
     }
 
-    function transferFrom(address from, address to, uint256 amount) public override
+    function transferFrom(address from, address to, uint256 amount) public virtual override
         notFrozen(msg.sender)  
         returns (bool) 
     {
@@ -109,7 +109,7 @@ contract Token is ERC20, ERC20Burnable, Pausable, ACL, ERC20Permit, Freezable {
 
     // The following functions are overrides required by Solidity.
 
-    function _update(address from, address to, uint256 value) internal override
+    function _update(address from, address to, uint256 value) internal virtual override
         whenNotPaused 
         notFrozen(from) 
     {
